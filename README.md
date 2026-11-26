@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jay Gandhi — Portfolio
 
-## Getting Started
+Personal portfolio and case studies. Next.js 16 (App Router, Cache Components), React 19, TypeScript (strict), Tailwind CSS v4, Framer Motion, Lucide.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn install
+yarn dev           # http://localhost:3000
+yarn build         # production build (works offline: fonts are self-hosted in src/fonts)
+yarn start         # serve the production build
+yarn lint
+yarn tsc --noEmit
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configure before deploying
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| What | Where |
+| --- | --- |
+| Site URL (canonical, sitemap, robots, OG image URLs) | `NEXT_PUBLIC_SITE_URL` env var, e.g. `https://example.com`. Falls back to `http://localhost:3000`. |
+| Email, resume path, availability pill, socials | `src/data/site.ts` |
+| Resume PDF | `public/resume/Jay_Gandhi_Resume.pdf` (path set in `site.ts`; `null` hides the download) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Where content lives
 
-## Learn More
+All copy is data. Components only render it.
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/data/
+  site.ts            personal info, links, availability
+  projects.ts        homepage project cards (order = display order)
+  case-studies/      one file per case study: sections, diagrams, decisions
+  experience.ts      timeline + interests
+  skills.ts          engineering capabilities
+  types.ts           shared types (Block, CaseStudy, ...)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Case-study sections are made of typed blocks (`p`, `list`, `callout`, `code`, `diagram`, `cards`, `decisions`). A `callout` with `tone: "placeholder"` renders a dashed "Content needed" slot, so missing details are visible rather than invented.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Diagrams are HTML (not images) in `src/components/projects/Diagrams.tsx`, registered by id.
 
-## Deploy on Vercel
+## Confidentiality
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **EMS** is an internal product under NDA. Keep it generic: no client, region, screens or source code.
+- **R3** is client work. No brand, domains, people, data or internal security details.
+- Code samples on case-study pages are illustrative patterns and are labelled as such.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure
+
+```
+src/app/            routes, metadata files (sitemap, robots, manifest, icons, OG images), 404
+src/components/
+  layout/           Navbar, Footer, BackToTop, MotionProvider, JsonLd
+  sections/         homepage sections
+  projects/         cards, case-study layout, blocks, diagrams
+  ui/               Button, Tag, Terminal, Reveal, CopyButton, ...
+src/lib/            utils, OG image renderer
+```
+
+Server Components by default. Client components are limited to the navbar, back-to-top, the case-study index, reveal animations, the hero headline and the copy button.
+
+Animations respect `prefers-reduced-motion`. Content stays visible without JavaScript.
