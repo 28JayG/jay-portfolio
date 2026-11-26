@@ -97,13 +97,13 @@ export const SuiteGlyph = () => {
   const apps = [
     { name: "Counselor app", sub: "web · desktop · mobile" },
     { name: "Client app", sub: "assessments · plans" },
-    { name: "Rewards", sub: "API + demo" },
+    { name: "Rewards API", sub: "endpoints · no UI" },
   ];
   return (
     <figure className="rounded-md border border-line bg-bg p-4">
       <figcaption className="label-mono mb-3 flex items-center justify-between text-[0.625rem] text-muted">
         <span>Product suite</span>
-        <span>3 products · 4 repos</span>
+        <span>3 products</span>
       </figcaption>
       <div className="grid grid-cols-3 gap-2">
         {apps.map((a, i) => (

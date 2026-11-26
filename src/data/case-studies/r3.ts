@@ -8,11 +8,11 @@ import type { CaseStudy } from "../types";
 export const r3: CaseStudy = {
   slug: "r3-recovery-platform",
   lede:
-    "A suite of three connected products for addiction-recovery care: a counselor app that turns sessions into AI-assisted clinical notes, a client app that keeps people engaged between sessions, and a rewards platform where clinics award points for recovery milestones. I was the only developer on our side for about eighteen months.",
+    "A suite of three connected products for addiction-recovery care: a counselor app that turns sessions into AI-assisted clinical notes, a client app that keeps people engaged between sessions, and a rewards API that organisations integrate so their clinics can award points for recovery milestones. I was the only developer on our side for about eighteen months.",
   facts: [
     { label: "Period", value: "Mar 2025 — Sep 2026" },
     { label: "My role", value: "Sole developer (our side)" },
-    { label: "Scope", value: "3 products · 4 repos" },
+    { label: "Scope", value: "3 products" },
     { label: "Surfaces", value: "Web · desktop · mobile" },
   ],
   sections: [
@@ -22,7 +22,7 @@ export const r3: CaseStudy = {
       blocks: [
         {
           type: "p",
-          text: "R3 is not one app. The counselor app is the centre of the suite and the only product that talks to the others; the client app stands on its own apart from SMS; the rewards platform is a separate API with its own demo frontend.",
+          text: "R3 is not one app. The counselor app is the centre of the suite and the only product that talks to the others; the client app stands on its own apart from SMS; the rewards platform is a backend only: a versioned set of endpoints any organisation can integrate to run a rewards programme for its clinics, with the counselor app as one such integration.",
         },
         {
           type: "diagram",
@@ -90,7 +90,7 @@ export const r3: CaseStudy = {
         {
           type: "list",
           items: [
-            "Only developer on our side across all four repositories, working with the client's developer and our project manager.",
+            "Only developer on our side across all three products, working with the client's developer and our project manager.",
             "Initial setup and code review for the repos; estimation and scoping for the client app.",
             "Architected the Next.js App Router frontends and designed the rewards platform's API contracts (OpenAPI 3.0).",
             "Built auth, role-based access, assessments, AI note flows and SEO in the counselor app.",
@@ -185,7 +185,7 @@ export const generate = async ({ usage, messages }: { usage: Usage; messages: Me
           blocks: [
             {
               type: "p",
-              text: "A B2B2C rewards system: clinics award points to clients for completed recovery tasks, and clients redeem them with a PIN. It is a NestJS API on MySQL with Drizzle ORM, served under a versioned path, with a React + Vite + Zustand demo app used to walk stakeholders through the flow.",
+              text: "A B2B2C rewards backend with no UI of its own: a versioned set of endpoints that an organisation integrates into its own tools to run a rewards programme for its clinics. Clinics award points to clients for completed recovery tasks, and clients redeem them with a PIN. It is a NestJS API on MySQL with Drizzle ORM, documented with an OpenAPI spec so integrators build against the contract, not the implementation.",
             },
             {
               type: "diagram",
@@ -237,7 +237,7 @@ export const generate = async ({ usage, messages }: { usage: Usage; messages: Me
             },
             {
               title: "Sole developer, many stakeholders",
-              text: "Owning delivery across four repos meant written requirements, explicit scope and timelines I set and kept.",
+              text: "Owning delivery across three products meant written requirements, explicit scope and timelines I set and kept.",
             },
           ],
         },
@@ -272,7 +272,7 @@ export const generate = async ({ usage, messages }: { usage: Usage; messages: Me
             },
             {
               decision: "Rewards as a separate, versioned API",
-              why: "The rewards model is reusable beyond this product, and a contract-first API keeps it independent.",
+              why: "Any organisation can plug rewards into its own tools, and a contract-first API keeps it independent of any single frontend.",
               tradeoff: "Another service to deploy and secure, with key management between services.",
             },
           ],
@@ -316,8 +316,8 @@ export const generate = async ({ usage, messages }: { usage: Usage; messages: Me
               text: "From a transcription-only MVP to the full product on Windows and Mac, with a repeatable build pipeline.",
             },
             {
-              title: "Rewards platform, contract-first",
-              text: "A versioned API with an OpenAPI spec and a demo app used for stakeholder walkthroughs.",
+              title: "Rewards API, contract-first",
+              text: "A versioned set of endpoints with an OpenAPI spec that organisations integrate into their own tools; the counselor app is one integration.",
             },
             {
               title: "A clean handover",
@@ -333,8 +333,8 @@ export const generate = async ({ usage, messages }: { usage: Usage; messages: Me
     },
   ],
   techGroups: [
-    { group: "Frontend", items: ["Next.js (App Router)", "React", "TypeScript", "Zustand", "Chart.js", "Leaflet"] },
-    { group: "Backend", items: ["NestJS", "Drizzle ORM", "MySQL", "Next.js route handlers"] },
+    { group: "Frontend", items: ["Next.js (App Router)", "React", "TypeScript", "Chart.js", "Leaflet"] },
+    { group: "Backend", items: ["NestJS", "Drizzle ORM", "MySQL", "OpenAPI 3.0", "Next.js route handlers"] },
     { group: "Platforms", items: ["Electron", "Electron Forge", "Capacitor"] },
     { group: "Integrations", items: ["AI providers (via one layer)", "Twilio SMS / OTP", "Scheduled jobs"] },
     { group: "Delivery", items: ["GitHub Actions", "Docker", "PM2", "Vercel"] },

@@ -53,12 +53,12 @@ export const projects: Project[] = [
     confidentiality:
       "Client work. Brand, people, data and screens are omitted; the suite is described generically.",
     summary:
-      "Three connected products for addiction-recovery care: a counselor app for AI-assisted clinical documentation, a client app for assessments and treatment plans, and a rewards platform where clinics award points for recovery milestones.",
+      "Three connected products for addiction-recovery care: a counselor app for AI-assisted clinical documentation, a client app for assessments and treatment plans, and a rewards API that organisations integrate so their clinics can award points for recovery milestones.",
     tech: ["Next.js", "TypeScript", "NestJS", "MySQL", "Electron", "Twilio", "Chart.js"],
     highlights: [
       "Counselor app — web, desktop and mobile",
       "Client app — assessments, plans, reminders",
-      "Rewards API — ledger-based points",
+      "Rewards API — endpoints organisations integrate",
       "AI notes behind one provider layer",
     ],
     cta: "Explore project",

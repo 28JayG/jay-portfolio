@@ -64,7 +64,8 @@ const Pipeline = ({ steps }: { steps: { title: string; sub?: string; tone?: Tone
   return (
     <ol className="grid gap-2 xl:auto-cols-fr xl:grid-flow-col">
       {steps.map((s, i) => (
-        <li key={s.title} className="relative flex xl:block">
+        // Steps are static and can repeat a title (e.g. "Feature code" at both ends), so key by position.
+        <li key={`${i}-${s.title}`} className="relative flex xl:block">
           <Box title={s.title} sub={s.sub} tone={s.tone} className="h-full w-full">
             <span className="mt-2 block font-mono text-[0.625rem] text-accent">{String(i + 1).padStart(2, "0")}</span>
           </Box>
@@ -257,7 +258,7 @@ const R3Landscape = () => {
       <div className="grid gap-2 md:grid-cols-3">
         <Box title="Counselor app" sub="Next.js 16 · web, Electron desktop, Capacitor mobile" tone="accent" />
         <Box title="Client app" sub="Next.js 15 · assessments, plans, homework, map" />
-        <Box title="Rewards demo" sub="React 19 · Vite · Zustand" />
+        <Box title="Integrating organisations" sub="their own tools, via an org API key" tone="dashed" />
       </div>
       <Down label="depends on" />
       <div className="grid gap-2 md:grid-cols-3">
@@ -274,7 +275,7 @@ const R3Landscape = () => {
             <Box title="Twilio" sub="OTP + scheduled SMS reminders" tone="muted" />
           </div>
         </Frame>
-        <Frame label="Rewards platform">
+        <Frame label="Rewards API (backend only)">
           <div className="grid gap-2">
             <Box title="NestJS 11 API" sub="versioned /v1, OpenAPI spec" tone="muted" />
             <Box title="MySQL + Drizzle" sub="ledger of point transactions" />
@@ -289,8 +290,8 @@ const R3Ledger = () => {
   return (
     <Pipeline
       steps={[
-        { title: "Clinic onboarding", sub: "organisation + API key" },
-        { title: "Client enrolment", sub: "client sets a PIN via a one-time link" },
+        { title: "Organisation onboarding", sub: "organisation created · API key issued" },
+        { title: "Client enrolment", sub: "registered via API · PIN set through a one-time link" },
         { title: "Earn", sub: "task completed → ledger credit", tone: "accent" },
         { title: "Redeem", sub: "PIN-authorised → ledger debit", tone: "muted" },
       ]}

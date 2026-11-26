@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { CaseStudySkeleton } from "@/components/projects/CaseStudySkeleton";
 import { JsonLd } from "@/components/layout/JsonLd";
 import { CaseStudyLayout } from "@/components/projects/CaseStudyLayout";
 import { site } from "@/data/site";
@@ -37,7 +39,20 @@ export const generateMetadata = async ({ params }: PageProps<"/work/[slug]">): P
   };
 };
 
-const CaseStudyPage = async ({ params }: PageProps<"/work/[slug]">) => {
+/**
+ * Reads `params` inside a Suspense boundary so the route's shared App Shell stays
+ * URL-independent (required by Partial Prefetching). Every slug is still fully
+ * prerendered via generateStaticParams, so direct loads ship the complete HTML.
+ */
+const CaseStudyPage = ({ params }: PageProps<"/work/[slug]">) => {
+  return (
+    <Suspense fallback={<CaseStudySkeleton />}>
+      <CaseStudyContent params={params} />
+    </Suspense>
+  );
+};
+
+const CaseStudyContent = async ({ params }: Pick<PageProps<"/work/[slug]">, "params">) => {
   const { slug } = await params;
   const data = resolve(slug);
   if (!data) notFound();
