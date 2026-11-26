@@ -1,6 +1,8 @@
 "use client";
 
 import { m } from "framer-motion";
+import { useSyncExternalStore } from "react";
+import { isIntroPlaying, subscribeToIntro } from "@/lib/intro";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -9,6 +11,11 @@ const ease = [0.16, 1, 0.3, 1] as const;
  * mask without ever being fully transparent. Screen readers get one clean string.
  */
 export const HeroHeadline = () => {
+  // Hold the entrance until the intro splash has handed off to the navbar.
+  // Server snapshot is "not ready" so hydration matches the SSR'd initial offset.
+  const ready = useSyncExternalStore(subscribeToIntro, () => !isIntroPlaying(), () => false);
+  const enter = ready ? { y: 0 } : { y: "60%" };
+
   return (
     <h1 className="font-display text-hero font-bold uppercase">
       <span className="sr-only">I build systems. Not just interfaces.</span>
@@ -17,7 +24,7 @@ export const HeroHeadline = () => {
           <m.span
             className="block text-fg"
             initial={{ y: "60%" }}
-            animate={{ y: 0 }}
+            animate={enter}
             transition={{ duration: 0.9, ease }}
           >
             I build systems<span className="text-accent">.</span>
@@ -27,7 +34,7 @@ export const HeroHeadline = () => {
           <m.span
             className="block text-transparent [-webkit-text-stroke:1.5px_var(--color-muted)]"
             initial={{ y: "60%" }}
-            animate={{ y: 0 }}
+            animate={enter}
             transition={{ duration: 0.9, delay: 0.1, ease }}
           >
             Not just interfaces.

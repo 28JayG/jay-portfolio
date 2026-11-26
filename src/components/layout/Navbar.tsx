@@ -75,8 +75,11 @@ export const Navbar = () => {
           onClick={() => setOpen(false)}
           className="font-display text-xl font-bold tracking-tight text-fg transition-colors hover:text-accent"
         >
-          {site.monogram.replace(".", "")}
-          <span className="text-accent">.</span>
+          {/* data-brand-mark: the intro splash measures this and flies into it. */}
+          <span data-brand-mark="" className="inline-block">
+            {site.monogram.replace(".", "")}
+            <span className="text-accent">.</span>
+          </span>
           <span className="sr-only"> {site.name}, home</span>
         </Link>
 

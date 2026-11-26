@@ -120,3 +120,51 @@
     padding-inline: 3rem;
   }
 }
+
+/* ------------------------------------------------------------------
+   Intro splash — state set on <html data-intro> by an inline script.
+   The slide-out is pure CSS so it starts before hydration; JS only
+   handles the fly-to-navbar. Failsafes clear everything if JS never runs.
+   ------------------------------------------------------------------ */
+@keyframes intro-slide-left {
+  from { transform: translateX(110%); }
+  to { transform: none; }
+}
+@keyframes intro-slide-right {
+  from { transform: translateX(-110%); }
+  to { transform: none; }
+}
+@keyframes intro-dot {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes intro-failsafe {
+  to { opacity: 0; visibility: hidden; }
+}
+@keyframes intro-brand-failsafe {
+  to { opacity: 1; }
+}
+
+/* "J" emerges leftwards from the centre line, "G." rightwards. */
+.intro-from-center-left {
+  animation: intro-slide-left 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+.intro-from-center-right {
+  animation: intro-slide-right 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+.intro-dot {
+  animation: intro-dot 0.35s ease-out 0.9s both;
+}
+
+[data-intro-overlay] {
+  animation: intro-failsafe 0.4s ease 5s forwards;
+}
+html:not([data-intro="playing"]) [data-intro-overlay] {
+  display: none;
+}
+
+/* The navbar logo is hidden while its stand-in flies over, so the hand-off is seamless. */
+html[data-intro="playing"] [data-brand-mark] {
+  opacity: 0;
+  animation: intro-brand-failsafe 0s 5.2s forwards;
+}

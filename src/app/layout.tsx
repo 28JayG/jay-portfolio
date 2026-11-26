@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { BackToTop } from "@/components/layout/BackToTop";
+import { InlineScript } from "@/components/layout/InlineScript";
+import { IntroSplash } from "@/components/layout/IntroSplash";
 import { Footer } from "@/components/layout/Footer";
 import { MotionProvider } from "@/components/layout/MotionProvider";
 import { Navbar } from "@/components/layout/Navbar";
 import { site } from "@/data/site";
+import { INTRO_SCRIPT } from "@/lib/intro";
 import "./globals.css";
 
 // Fonts are self-hosted variable fonts (latin subset, OFL — see src/fonts/LICENSE-*),
@@ -67,9 +70,13 @@ const RootLayout = ({ children }: LayoutProps<"/">) => {
   return (
     <html
       lang="en"
+      // The intro script sets data-intro on <html> before hydration.
+      suppressHydrationWarning
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body className="flex min-h-dvh flex-col">
+        <InlineScript html={INTRO_SCRIPT} />
+        <IntroSplash />
         <noscript>
           <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
         </noscript>
