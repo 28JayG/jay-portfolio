@@ -14,12 +14,12 @@ export const projects: Project[] = [
     confidentiality:
       "Internal product under NDA. Client, domain specifics and screens are generalised.",
     summary:
-      "An internal enterprise platform for running elections end to end: multi-step administrative workflows, voter and records management, granular permissions, and integrations with physical printing and scanning hardware.",
+      "An internal platform that administrators, records staff and operations teams use to run elections end to end: multi-step workflows, voter and records management, granular permissions, and printing and scanning hardware.",
     tech: ["React", "TypeScript", "Keycloak", "React Query", "TanStack Table", "Material UI"],
     highlights: [
       "Role-based access control across routes, actions and data",
       "Large server-driven tables with paging, sorting and filtering",
-      "API-driven, multi-step administrative workflows",
+      "Config-driven forms, reviews and comparisons",
       "Shared, reusable component foundations",
       "Printer and scanner device integrations",
       "Keycloak authentication and authorization",

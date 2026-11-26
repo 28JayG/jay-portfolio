@@ -65,8 +65,8 @@ export const Engineering = () => {
             How I think about engineering
           </h2>
           <p className="max-w-md text-lg leading-relaxed text-muted lg:col-span-4">
-            Tools change. The questions don&apos;t: where state lives, what owns a decision, and what
-            it costs to change later.
+            Every technical decision is a product decision in disguise. It sets how fast the team can
+            change things, and what users feel when they do.
           </p>
         </div>
 

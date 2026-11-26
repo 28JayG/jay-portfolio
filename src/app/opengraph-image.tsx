@@ -9,7 +9,7 @@ const Image = () => {
   return renderOgCard({
     eyebrow: site.title,
     title: "I build systems. Not just interfaces.",
-    subtitle: "React · Next.js · TypeScript · Frontend architecture",
+    subtitle: `${site.focus} · owning features from the problem to production`,
     tags: [`${site.yearsExperience} years`, "React", "Next.js", "TypeScript"],
   });
 };

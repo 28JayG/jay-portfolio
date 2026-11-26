@@ -8,10 +8,10 @@ import type { CaseStudy } from "../types";
 export const copilot: CaseStudy = {
   slug: "ai-timesheet-copilot",
   lede:
-    "A productivity tool that tracks time against projects and uses AI to turn that activity into structured timesheet entries — so reporting time stops being a weekly chore. It is under active development; this page describes the direction, not a finished product.",
+    "A productivity tool that tracks time against projects and uses AI to turn that activity into structured timesheet entries — so reporting time stops being a weekly chore. It is a solo side project under active development; this page describes the direction, not a finished product.",
   facts: [
     { label: "Status", value: "In development" },
-    { label: "Type", value: "AI / productivity tool" },
+    { label: "Type", value: "Solo side project" },
     { label: "Frontend", value: "Vue.js" },
     { label: "Backend", value: "Python · FastAPI" },
   ],
@@ -54,17 +54,6 @@ export const copilot: CaseStudy = {
             { title: "Context switching", text: "Logging time interrupts the work it is supposed to describe." },
             { title: "Tools are separate", text: "Time lives in one place, the reporting workflow in another." },
           ],
-        },
-      ],
-    },
-    {
-      id: "role",
-      title: "My role and responsibilities",
-      blocks: [
-        {
-          type: "callout",
-          tone: "placeholder",
-          text: "[Add: your role — solo build or team, which parts you own (Vue frontend, FastAPI service, AI integration) and why you started it.]",
         },
       ],
     },

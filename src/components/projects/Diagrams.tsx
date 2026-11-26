@@ -86,7 +86,7 @@ const EmsSystem = () => {
   return (
     <div className="grid gap-0">
       <Box title="Identity provider" sub="Keycloak · users, roles, sessions" tone="accent" />
-      <Down label="tokens + role claims" />
+      <Down label="session tokens · permissions API" />
       <Frame label="Frontend applications">
         <div className="grid gap-2 md:grid-cols-3">
           <Box title="Feature modules" sub="admin workflows · records · results" />
@@ -106,14 +106,29 @@ const EmsSystem = () => {
 
 const EmsAuth = () => {
   return (
+    <div className="grid gap-3">
+      <Pipeline
+        steps={[
+          { title: "Feature code", sub: "api.get(...) — no auth logic" },
+          { title: "Request interceptor", sub: "refresh if expiring · Bearer token · tenant context", tone: "accent" },
+          { title: "Backend API", sub: "validates token and context", tone: "muted" },
+          { title: "Response interceptor", sub: "401 → logout · 403 → notify + redirect", tone: "accent" },
+          { title: "Feature code", sub: "gets data or a handled error" },
+        ]}
+      />
+      <Box title="Keycloak session" sub="login · token refresh on demand · logout — no background timers" tone="dashed" />
+    </div>
+  );
+};
+
+const EmsPermissions = () => {
+  return (
     <Pipeline
       steps={[
-        { title: "Unauthenticated user", sub: "hits a protected route" },
-        { title: "Keycloak login", sub: "redirect to the identity provider", tone: "accent" },
-        { title: "Tokens issued", sub: "app receives an authenticated session" },
-        { title: "Claims → permissions", sub: "roles mapped to one typed permission set" },
-        { title: "Guarded UI", sub: "routes, actions and fields" },
-        { title: "API enforcement", sub: "server validates every request", tone: "muted" },
+        { title: "Permissions API", sub: "role → modules → sub-modules", tone: "muted" },
+        { title: "Flatten once", sub: "child granted only if parent is · flags inherited", tone: "accent" },
+        { title: "Zustand store", sub: "one flat lookup table" },
+        { title: "hasAccess(path)", sub: "routes · menus · buttons · config fields", tone: "accent" },
       ]}
     />
   );
@@ -170,16 +185,50 @@ const EmsComponents = () => {
   );
 };
 
+const EmsConfig = () => {
+  return (
+    <div className="grid gap-0">
+      <div className="grid gap-2 md:grid-cols-2">
+        <Box title="Sections" sub="ordered fields · path prefix · hidden per intake channel" tone="accent" />
+        <Box title="Field metadata" sub="type · label · permission · visibleIf · warnIfChanged" tone="accent" />
+      </div>
+      <Down label="one typed definition, read by" />
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Box title="Add / edit form" sub="inputs by field type" />
+        <Box title="Review screen" sub="before → after diff" />
+        <Box title="Duplicate compare" sub="side-by-side rows" />
+        <Box title="Search & reports" sub="their own configs" tone="muted" />
+      </div>
+      <Down label="enforced in every view" />
+      <Box title="Rules travel with the field" sub="PII hidden without permission · conditional fields · warnings on sensitive changes" tone="dashed" />
+    </div>
+  );
+};
+
 const EmsDevices = () => {
   return (
-    <Pipeline
-      steps={[
-        { title: "Workflow step", sub: "user triggers print / scan" },
-        { title: "Integration layer", sub: "mechanism generalised", tone: "dashed" },
-        { title: "Printer / scanner", sub: "physical devices", tone: "muted" },
-        { title: "Result back in UI", sub: "status, errors, retry", tone: "accent" },
-      ]}
-    />
+    <div className="grid gap-4">
+      <Frame label="Print">
+        <Pipeline
+          steps={[
+            { title: "Print action", sub: "single or batch" },
+            { title: "Preflight", sub: "local access · service ping · license", tone: "accent" },
+            { title: "Local print service", sub: "ScriptX.Services", tone: "muted" },
+            { title: "Printer", sub: "assigned printer · tray · paper · copies" },
+          ]}
+        />
+      </Frame>
+      <Frame label="Scan">
+        <Pipeline
+          steps={[
+            { title: "Scanner", sub: "TWAIN · feeder · duplex", tone: "muted" },
+            { title: "Scanning library", sub: "Dynamsoft Web TWAIN · capabilities", tone: "accent" },
+            { title: "Batch buffer", sub: "IndexedDB · survives reload" },
+            { title: "Barcode indexing", sub: "matched → record · rest → unindexed", tone: "accent" },
+          ]}
+        />
+      </Frame>
+    </div>
   );
 };
 
@@ -252,10 +301,12 @@ const R3Ledger = () => {
 const registry: Record<DiagramId, () => ReactNode> = {
   "ems-system": EmsSystem,
   "ems-auth": EmsAuth,
+  "ems-permissions": EmsPermissions,
   "ems-state": EmsState,
   "ems-table": EmsTable,
   "ems-components": EmsComponents,
   "ems-devices": EmsDevices,
+  "ems-config": EmsConfig,
   "copilot-flow": CopilotFlow,
   "r3-landscape": R3Landscape,
   "r3-ledger": R3Ledger,

@@ -48,7 +48,7 @@ export const ems: CaseStudy = {
           type: "list",
           items: [
             "Many roles share one system, each allowed to see and change different things.",
-            "Datasets are large — records, candidates and results — and must stay correct under heavy use.",
+            "Datasets are large — (2M+) records, candidates and results — and must stay correct under heavy use.",
             "Workflows cross into the physical world through printers and scanners.",
             "Screen configuration (navigation, columns, filters) changes more often than core logic.",
             "Services are deployed into a restricted cloud environment with tight operational constraints.",
@@ -102,13 +102,15 @@ export const ems: CaseStudy = {
         {
           type: "list",
           items: [
-            "Directed frontend architecture and delivery across the platform's frontends.",
+            "Directed frontend architecture and delivery across the platform's frontends, from scoping with product to production releases.",
             "Led and mentored a 4-person frontend team; worked with product, design, backend and DevOps.",
             "Architected a headless-CMS-driven configuration layer for navigation, tables and filters.",
+            "Designed typed form configuration that drives create, edit, review and comparison screens from one definition.",
             "Spearheaded a shared React component library, distributed through a private registry with versioned releases.",
             "Restructured derived data in Zustand and introduced virtualisation for results views with hundreds of tables.",
             "Engineered a paginated candidate-facing portal supporting 2,000+ candidates.",
-            "Built authentication and authorization on Keycloak with role-based access control.",
+            "Integrated silent printing through a local print service, and built a reusable scanning library with batch scanning and barcode indexing.",
+            "Built Keycloak authentication with just-in-time token refresh in the API layer, and a server-driven, module-based permission model.",
             "Deployed containerised frontend services to a restricted cloud environment.",
           ],
         },
@@ -120,7 +122,7 @@ export const ems: CaseStudy = {
       blocks: [
         {
           type: "p",
-          text: "Identity sits at the top: Keycloak issues the session and role claims every frontend relies on. Each application is organised into feature modules over a shared state layer and a shared UI library. Below that, a headless CMS supplies screen configuration, backend APIs own the data, and device integrations handle print and scan.",
+          text: "Identity sits at the top: Keycloak issues the session every frontend relies on, and a permissions service decides what each user can do. Each application is organised into feature modules over a shared state layer and a shared UI library. Below that, a headless CMS supplies screen configuration, backend APIs own the data, and device integrations handle print and scan.",
         },
         {
           type: "diagram",
@@ -135,42 +137,82 @@ export const ems: CaseStudy = {
           blocks: [
             {
               type: "p",
-              text: "Authentication is delegated to Keycloak. The frontend's job is to turn the identity provider's role claims into a single, typed permission model and make that model the only way the UI asks “can this user do this?”.",
+              text: "Identity and authorization are deliberately separate. Keycloak owns who the user is and keeps the session alive; the platform's permissions service decides what they can do. The frontend's job is to keep both invisible to feature code: no component touches a token, and no component reads a raw role.",
+            },
+            {
+              type: "p",
+              text: "Token management lives in one place: an Axios interceptor on the shared API client. Before every request it asks Keycloak to refresh the access token if it is about to expire, then attaches it together with the user's working context: the jurisdiction and user type they are acting as, kept per browser tab. There are no background refresh timers. A token is renewed exactly when a request needs it.",
             },
             {
               type: "diagram",
               id: "ems-auth",
-              caption: "Generalised OIDC-style flow: the UI uses permissions to shape the experience; the API remains the enforcement point.",
+              caption: "Every API call passes through the same two interceptors. Feature code just calls the API.",
             },
             {
               type: "list",
               items: [
-                "One mapping from identity-provider roles to application permissions — never raw role strings in components.",
-                "Guards at three levels: routes, actions (buttons, menu items) and individual fields.",
-                "The UI hides what a user cannot do; the server still rejects it. The frontend is never the security boundary.",
+                "401: a clear “session expired” message and a clean logout, rather than a screen of failed requests.",
+                "403: the server's reason is shown and the user is returned to the dashboard instead of a broken page.",
+                "A failed refresh logs the user out, so the app is never half-authenticated.",
+                "Before the app loads, unverified emails and pending required actions (like a forced password change) are routed to their own screens.",
               ],
             },
             {
               type: "code",
-              file: "permissions.tsx",
-              caption: "Illustrative pattern — simplified, not production code.",
-              code: `type Permission = "records.view" | "records.edit" | "results.publish";
+              file: "use-axios-interceptor.ts",
+              caption: "Illustrative pattern — simplified from the real interceptor; names generalised.",
+              code: `api.interceptors.request.use(async (config) => {
+  if (keycloak.authenticated) {
+    try {
+      await keycloak.updateToken(5); // refresh only if it expires within 5s
+      config.headers.set("Authorization", \`Bearer \${keycloak.token}\`);
+      config.headers.set("X-Tenant-Context", encodeContext(getTabContext()));
+    } catch {
+      await keycloak.logout(); // never send a request with a dead session
+    }
+  }
+  return config;
+});
 
-export const useCan = () => {
-  const { permissions } = useSession(); // derived from Keycloak role claims
-  return (p: Permission) => permissions.has(p);
-};
-
-export const Can = ({ I, children }: { I: Permission; children: React.ReactNode }) => {
-  return useCan()(I) ? <>{children}</> : null;
-};
-
-// <Can I="results.publish"><PublishButton /></Can>`,
+api.interceptors.response.use(undefined, async (error) => {
+  if (error.response?.status === 401) return sessionExpired(error);
+  if (error.response?.status === 403) return accessDenied(error); // toast + redirect
+  return Promise.reject(error);
+});`,
             },
             {
-              type: "callout",
-              tone: "placeholder",
-              text: "[Add: how sessions/tokens were refreshed and stored, and the rough size of the role → permission model.]",
+              type: "p",
+              text: "Authorization starts once the session exists. The app loads the user's permissions as a tree of modules and sub-modules, each with its own permission flags. A small transform flattens that tree once: a child module is granted only if its parent is, and inherits its parent's permissions. The result lives in a Zustand store. From then on every route, menu item, button and config-driven field asks the same question through one helper, called in hundreds of places across the app.",
+            },
+            {
+              type: "diagram",
+              id: "ems-permissions",
+              caption: "Server-defined module tree → flattened once → one lookup everywhere.",
+            },
+            {
+              type: "code",
+              file: "permissions.ts",
+              caption: "Illustrative pattern — the flatten step and the single access check.",
+              code: `const flatten = (tree: ModuleTree, parentGranted = true, inherited: Flags = {}) =>
+  Object.entries(tree).reduce<Record<string, Flags>>((acc, [key, mod]) => {
+    const granted = parentGranted && mod.assigned;
+    if (!granted) return acc; // a revoked parent hides its whole subtree
+    const flags = { ...inherited, ...mod.permissions };
+    return { ...acc, [key]: flags, ...flatten(mod.modules ?? {}, granted, flags) };
+  }, {});
+
+export const hasAccess = (path: string) =>
+  get(usePermissionsStore.getState().modules, path, false);
+
+// hasAccess("Records.Edit") — routes, actions and fields all use this`,
+            },
+            {
+              type: "list",
+              items: [
+                "Admins manage roles and modules on the server, so access changes need no frontend release.",
+                "Confidential records add a second check on top of the role.",
+                "The UI hides what a user cannot do; the API still rejects it. The frontend is never the security boundary.",
+              ],
             },
           ],
         },
@@ -253,22 +295,100 @@ export const toColumns = (config: ColumnConfig[], can: (p: Permission) => boolea
           ],
         },
         {
+          id: "config-ui",
+          title: "Config-driven forms and screens",
+          blocks: [
+            {
+              type: "p",
+              text: "The core records are long: dozens of fields across identity, addresses, districts, history and status. The same record appears in many places — a create form, an edit form, a review screen that shows what changed, a side-by-side view for resolving duplicates. Hand-writing each of those would mean the same field rules re-implemented four times and drifting apart.",
+            },
+            {
+              type: "p",
+              text: "Instead, each record type is described once as typed configuration: sections with an ordered list of fields, and metadata per field — its type, label, the permission needed to see it, when it should be visible, and whether a change needs a warning. Shared renderers read that definition for every view. The same approach drives search screens, comparison tools and reports, each with its own config.",
+            },
+            {
+              type: "diagram",
+              id: "ems-config",
+              caption: "One definition, many views. Business rules live with the field, not in each screen.",
+            },
+            {
+              type: "list",
+              items: [
+                "Sensitive fields carry a permission and disappear for roles without it, in every view at once.",
+                "Conditional fields and sections hidden per intake channel are declared, not coded.",
+                "Changes to sensitive fields can warn the operator and trigger a notification — set by one flag.",
+                "A new field or a reordered section is a config edit, reviewed like code and fully typed.",
+              ],
+            },
+            {
+              type: "code",
+              file: "record-form.config.ts",
+              caption: "Illustrative pattern — field names generalised; mirrors the shape of the real config.",
+              code: `const formConfig: FormConfig = {
+  sections: {
+    identity: { label: "Identity", fields: ["lastName", "firstName", "birthDate", "taxId"] },
+    residence: { label: "Residence", prefix: "residence", fields: ["street1", "city", "zip5"] },
+    renewal: { label: "Renewal", hideFor: ["external-intake"], fields: ["renewalDate"] },
+  },
+  fieldsMetadata: {
+    taxId: { label: "Tax ID (last 4)", type: "number", permission: Permissions.ViewPII },
+    isConfidential: {
+      label: "Confidential record",
+      type: "boolean",
+      options: { warnIfChanged: true, notifyIfChanged: true },
+    },
+    renewalDate: {
+      label: "Renewal date",
+      type: "date",
+      options: { visibleIf: [{ field: "isActive", value: true }] },
+    },
+  },
+};`,
+            },
+          ],
+        },
+        {
           id: "devices",
           title: "Device and printing integrations",
           blocks: [
             {
               type: "p",
-              text: "Some workflows end with paper: documents are printed, and forms are scanned back into the system. From the frontend's perspective these are long-running, failure-prone steps inside an otherwise ordinary workflow, so the UI treats them as explicit states — pending, succeeded, failed, retryable — rather than fire-and-forget calls.",
+              text: "Some workflows end on paper. Letters, documents and labels are printed, often in batches of hundreds, and returned forms are scanned back in. A browser can do neither well on its own: the print dialog can't target a specific printer and tray, and it can't talk to a TWAIN scanner at all. Both go through software installed on the operator's machine, which the web app talks to over the local network.",
             },
             {
               type: "diagram",
               id: "ems-devices",
-              caption: "The device step is modelled as part of the workflow, with visible status and recovery.",
+              caption: "Two local integrations behind one rule: check everything before the user commits, and say exactly what to fix when something is missing.",
             },
             {
-              type: "callout",
-              tone: "placeholder",
-              text: "[Add: how the browser reached printers and scanners (local agent, vendor SDK, server-side job, etc.), and the hardest failure mode you handled — described at a level the NDA allows.]",
+              type: "p",
+              text: "Printing uses ScriptX.Services, a print service running locally. A single hook wraps every print in the same preflight: confirm the browser allows local-network access (newer Chrome and Edge ask for permission), ping the service and open an install prompt if it is missing, make sure the license is applied, then print. Jobs go silently to a chosen printer, tray, paper size and number of copies, and admins map printers to users and locations so operators don't pick from a raw device list.",
+            },
+            {
+              type: "code",
+              file: "use-print.ts",
+              caption: "Illustrative pattern — simplified from the real print hook.",
+              code: `const printDocument = async (print: () => Promise<Result>, successMessage?: string) => {
+  if (!(await checkLocalNetworkAccess()).granted) return promptLocalAccess();
+  if (!(await pingPrintService()).success) return promptInstall(); // guided download
+  if (!(await getLicense()).data?.guid) await applyLicense();
+
+  const res = await print(); // PDF/HTML → printer, tray, paper size, copies
+  res.success ? notify(successMessage ?? "Print success") : onError?.();
+};`,
+            },
+            {
+              type: "p",
+              text: "Scanning lives in its own package: a versioned, reusable library built on Dynamsoft Web TWAIN. It discovers each scanner's capabilities (sources, resolution, colour mode, feeder and duplex) and turns them into plain settings the UI can show. Batch scans are buffered in IndexedDB, so a long scanning session survives a page reload. Barcodes on generated documents and labels are read from the scanned pages, so pages are filed against the right record automatically; anything unreadable lands in an unindexed list for manual matching.",
+            },
+            {
+              type: "list",
+              items: [
+                "Print and scan failures are explicit states with a next step, never a silent no-op.",
+                "Device setup is a guided prompt in the app, not a support ticket.",
+                "The scanning library exposes a provider, hooks and storage utilities, so host apps never touch the TWAIN SDK directly.",
+                "Output is converted to the format each workflow needs (PDF, PNG or TIFF; blob or base64) inside the library.",
+              ],
             },
           ],
         },
@@ -313,6 +433,14 @@ export const toColumns = (config: ColumnConfig[], can: (p: Permission) => boolea
               text: "Moving UI into CMS configuration turns that configuration into an API. It needs a schema, validation and safe fallbacks when something is missing.",
             },
             {
+              title: "Same record, many screens",
+              text: "A long record appears in create, edit, review and duplicate-comparison views. Without one definition, every field rule would be rewritten per screen and drift.",
+            },
+            {
+              title: "Devices the browser can't reach",
+              text: "Silent printing to a specific tray and TWAIN scanning both need local software, plus permission prompts that newer browsers now require.",
+            },
+            {
               title: "Shipping into a restricted environment",
               text: "Containerised frontend services had to be deployable into a locked-down cloud with limited access and strict change control.",
             },
@@ -328,19 +456,24 @@ export const toColumns = (config: ColumnConfig[], can: (p: Permission) => boolea
           type: "decisions",
           items: [
             {
+              decision: "Refresh tokens just in time, inside the API client",
+              why: "One place handles auth for every request, with no refresh timers drifting in background tabs.",
+              tradeoff: "The first request after a long idle waits for a refresh, and all traffic must go through the shared client.",
+            },
+            {
+              decision: "Load permissions from the server and flatten them once",
+              why: "Admins change access without a frontend release; inheritance is resolved once, so every check is a cheap lookup.",
+              tradeoff: "Protected screens wait for permissions to load, and the store must refresh when an admin changes a role.",
+            },
+            {
+              decision: "Describe record screens as typed configuration",
+              why: "Create, edit, review and compare views stay consistent, and field-level rules such as permissions and visibility are defined once.",
+              tradeoff: "The renderer has to support every edge case through config options. Truly one-off layouts still need an escape hatch.",
+            },
+            {
               decision: "Drive navigation, tables and filters from a headless CMS",
               why: "Configuration changed far more often than logic. Making it data removed a whole class of frontend releases.",
               tradeoff: "The config schema becomes a contract that needs validation, versioning and defaults — and is harder to test than code.",
-            },
-            {
-              decision: "Ship shared UI as a versioned package, not a copied folder",
-              why: "Several apps needed the same components; versioned releases let each upgrade on its own schedule.",
-              tradeoff: "Release overhead, and apps can drift across versions if upgrades are not kept up.",
-            },
-            {
-              decision: "Push paging, sorting and filtering to the server",
-              why: "Datasets are too large for the client, and the server stays the single source of truth.",
-              tradeoff: "Every interaction is a request; caching and placeholder data are needed to keep it feeling instant.",
             },
             {
               decision: "Give each kind of state one home",
@@ -348,9 +481,24 @@ export const toColumns = (config: ColumnConfig[], can: (p: Permission) => boolea
               tradeoff: "More concepts for new engineers, so the conventions need to be written down and reviewed.",
             },
             {
-              decision: "Map identity roles into one typed permission model",
-              why: "Components ask about capabilities, not roles — role changes stay in one file.",
-              tradeoff: "The mapping must be kept in sync with role changes in the identity provider.",
+              decision: "Push paging, sorting and filtering to the server",
+              why: "Datasets are too large for the client, and the server stays the single source of truth.",
+              tradeoff: "Every interaction is a request; caching and placeholder data are needed to keep it feeling instant.",
+            },
+            {
+              decision: "Ship shared UI as a versioned package, not a copied folder",
+              why: "Several apps needed the same components; versioned releases let each upgrade on its own schedule.",
+              tradeoff: "Release overhead, and apps can drift across versions if upgrades are not kept up.",
+            },
+            {
+              decision: "Print through a local print service, not the browser dialog",
+              why: "Operators print batches to specific printers and trays; a dialog per document would make that impossible.",
+              tradeoff: "Every workstation needs the service installed and licensed, and browsers now gate local-network access, so the app must detect and guide both.",
+            },
+            {
+              decision: "Package scanning as its own library",
+              why: "The TWAIN SDK, capability handling and batch storage are complex and reused; isolating them keeps host apps simple.",
+              tradeoff: "Changes need a library release and a version bump in each consumer.",
             },
           ],
         },
@@ -400,26 +548,29 @@ export const toColumns = (config: ColumnConfig[], can: (p: Permission) => boolea
               title: "Portal at scale",
               text: "A paginated candidate-facing portal supporting 2,000+ candidates.",
             },
+            {
+              title: "One definition per record",
+              text: "Typed form configuration drives create, edit, review and comparison screens, with permissions and visibility rules declared once.",
+            },
+            {
+              title: "Paper workflows in the browser",
+              text: "Silent batch printing to assigned printers, and a reusable scanning library with barcode indexing and guided device setup.",
+            },
           ],
         },
         {
           type: "p",
-          text: "The biggest lesson: in a system like this, architecture is mostly about where decisions live. Permissions in one model, state in one home per kind, configuration in one schema. When each decision has a single place, a small team can move quickly without breaking things it cannot see.",
-        },
-        {
-          type: "callout",
-          tone: "placeholder",
-          text: "[Optional: any further outcome you can share — adoption of the library, performance before/after, or feedback from operators.]",
+          text: "The biggest lesson: in a system like this, architecture is mostly about where decisions live. Tokens in one interceptor, permissions in one store, field rules in one config, device checks in one hook, state in one home per kind. When each decision has a single place, a small team can move quickly without breaking things it cannot see.",
         },
       ],
     },
   ],
   techGroups: [
-    { group: "Core", items: ["React", "TypeScript"] },
-    { group: "Identity", items: ["Keycloak", "RBAC"] },
+    { group: "Core", items: ["React", "TypeScript", "Axios"] },
+    { group: "Identity & access", items: ["Keycloak", "JIT token refresh", "Module-based permissions"] },
     { group: "Data & state", items: ["React Query", "Zustand", "TanStack Table", "Virtualisation"] },
-    { group: "UI", items: ["Material UI", "Shared component library", "Private package registry"] },
+    { group: "UI", items: ["Material UI", "Shared component library", "Typed form configuration", "Private package registry"] },
     { group: "Platform", items: ["Headless CMS (Strapi)", "PostgreSQL", "Docker"] },
-    { group: "Integrations", items: ["Printers", "Scanners"] },
+    { group: "Integrations", items: ["ScriptX.Services", "Dynamsoft Web TWAIN", "ZXing", "IndexedDB"] },
   ],
 };

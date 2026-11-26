@@ -16,7 +16,7 @@ export const SelectedWork = () => {
             Selected work
           </h2>
           <p className="max-w-md text-lg leading-relaxed text-muted lg:col-span-4 lg:col-start-9">
-            Some problems I&apos;ve worked on and systems I&apos;ve helped build.
+            Products I&apos;ve helped shape and ship, and the problems that made them hard.
           </p>
         </div>
 

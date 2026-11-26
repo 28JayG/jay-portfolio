@@ -5,9 +5,9 @@ import { site } from "@/data/site";
 import { HeroHeadline } from "./HeroHeadline";
 
 const spec = [
-  { key: "Experience", value: `${site.yearsExperience} years building` },
-  { key: "Stack", value: "React / Next.js" },
-  { key: "Focus", value: "Frontend architecture" },
+  { key: "Experience", value: `${site.yearsExperience} years shipping` },
+  { key: "Role", value: "Product engineer" },
+  { key: "Strength", value: "Frontend · React / Next.js" },
   { key: "Location", value: `Based in ${site.location}` },
 ];
 
@@ -29,7 +29,7 @@ export const Hero = () => {
         <div className="label-mono mb-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-muted sm:mb-12">
           <p>
             <span className="text-fg">{site.name}</span> <span className="text-accent">/</span>{" "}
-            {site.title}
+            {site.title} <span className="text-accent">·</span> {site.focus}
           </p>
           <p className="hidden sm:block">Portfolio — Index</p>
         </div>
@@ -44,10 +44,10 @@ export const Hero = () => {
               <Emphasize
                 text={site.statement}
                 phrases={[
-                  "frontend engineer",
-                  "scalable applications",
-                  "complex UI problems",
-                  "thoughtful architectural decisions",
+                  "product engineer",
+                  "leans frontend",
+                  "from the problem to production",
+                  "easy to change",
                 ]}
               />
             </p>

@@ -2,12 +2,13 @@ import { Reveal } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { Tag } from "@/components/ui/Tag";
 import { experience, interests } from "@/data/experience";
+import { visibleExperience } from "@/lib/placeholders";
 import { cn } from "@/lib/utils";
 
 const Timeline = () => {
   return (
     <ol className="relative">
-      {experience.map((entry, i) => (
+      {visibleExperience(experience).map((entry, i) => (
         <li
           key={`${entry.company}-${i}`}
           className={cn(
@@ -51,16 +52,18 @@ export const About = () => {
 
             <Reveal className="mt-10 max-w-2xl space-y-5 text-lg leading-relaxed text-muted">
               <p>
-                I&apos;m Jay — a <span className="text-fg">frontend engineer</span> with over five
-                years of building web applications. I enjoy the problems where the interface is the hard
-                part: permission-heavy enterprise tools, data-dense screens and workflows with a lot of
-                states to get right.
+                I&apos;m Jay — a <span className="text-fg">product engineer</span> with over five years
+                of building web products, most of it on the frontend. I like owning a feature{" "}
+                <span className="text-fg">end to end</span>: understanding why it matters, shaping the
+                scope with product and design, building the UI and the APIs it needs, and seeing it
+                through to production.
               </p>
               <p>
-                I like understanding the <span className="text-fg">system behind a screen</span> — the
-                API contract, the auth model, the shape of the data — because that is usually where the
-                real UI decisions get made. I care about code that the next engineer can change with
-                confidence.
+                Most of my work has been where the interface is the hard part: permission-heavy
+                enterprise tools, data-dense screens and healthcare workflows. I&apos;ve led a small
+                frontend team and been the only engineer on a client product. Both taught me that the
+                most useful thing an engineer brings is{" "}
+                <span className="text-fg">judgment about what to build</span>, not just how.
               </p>
             </Reveal>
 

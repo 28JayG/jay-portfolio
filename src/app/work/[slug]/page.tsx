@@ -5,6 +5,7 @@ import { CaseStudyLayout } from "@/components/projects/CaseStudyLayout";
 import { site } from "@/data/site";
 import { getCaseStudy } from "@/data/case-studies";
 import { projects } from "@/data/projects";
+import { prepareCaseStudy } from "@/lib/placeholders";
 
 export const generateStaticParams = () => {
   return projects.map((p) => ({ slug: p.slug }));
@@ -16,7 +17,7 @@ const resolve = (slug: string) => {
   const study = getCaseStudy(slug);
   if (!project || !study) return null;
   const next = projects[(index + 1) % projects.length]!;
-  return { project, study, index, next };
+  return { project, study: prepareCaseStudy(study), index, next };
 };
 
 export const generateMetadata = async ({ params }: PageProps<"/work/[slug]">): Promise<Metadata> => {

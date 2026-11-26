@@ -8,6 +8,8 @@ export type SiteConfig = {
   name: string;
   monogram: string;
   title: string;
+  /** Short qualifier shown next to the title, e.g. "Frontend-leaning". */
+  focus: string;
   url: string;
   location: string;
   yearsExperience: string;
@@ -66,10 +68,12 @@ export type Capability = {
 export type DiagramId =
   | "ems-system"
   | "ems-auth"
+  | "ems-permissions"
   | "ems-state"
   | "ems-table"
   | "ems-components"
   | "ems-devices"
+  | "ems-config"
   | "copilot-flow"
   | "r3-landscape"
   | "r3-ledger";

@@ -7,7 +7,8 @@ import type { SiteConfig } from "./types";
 export const site: SiteConfig = {
   name: "Jay Gandhi",
   monogram: "JG.",
-  title: "Frontend Engineer",
+  title: "Product Engineer",
+  focus: "Frontend-leaning",
   // Set NEXT_PUBLIC_SITE_URL at deploy time once the domain is bought.
   // Drives canonical URLs, the sitemap, robots.txt and absolute Open Graph image URLs.
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
@@ -15,7 +16,7 @@ export const site: SiteConfig = {
   yearsExperience: "05+",
   positioning: "I build systems, not just interfaces.",
   statement:
-    "I am a frontend engineer focused on building scalable applications, solving complex UI problems and making thoughtful architectural decisions.",
+    "I'm a product engineer. I own features from the problem to production: shaping scope with product and design, building the interface and the APIs behind it, and making the architectural calls that keep a product easy to change.",
   availability: {
     open: true,
     label: "Open to new roles",

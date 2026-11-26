@@ -10,40 +10,40 @@ export const experience: ExperienceEntry[] = [
     company: "BrightPeers",
     period: "Jan 2024 — Nov 2026",
     summary:
-      "Led frontend architecture and a 4-person frontend team across an enterprise platform ecosystem: shared component library, config-driven UI and a Next.js platform.",
+      "Owned frontend architecture and delivery across an enterprise platform ecosystem and led a 4-person team. Also the sole engineer on a three-product healthcare client suite.",
   },
   {
     role: "Fullstack Developer",
     company: "IntraEdge Technologies",
     period: "Jul 2023 — Jan 2024",
     summary:
-      "Frontend services, API integrations and Okta SSO for an internal enterprise mortgage-management system.",
+      "Owned Okta SSO for an internal mortgage-management system end to end, from frontend architecture through deployment.",
   },
   {
     role: "Senior Software Developer",
     company: "Propelius Technologies",
     period: "Feb 2022 — Jul 2023",
     summary:
-      "Led a human-in-the-loop review application and frontend architecture across server-driven apps.",
+      "Led delivery of a human-in-the-loop review app, and turned a struggling engagement into a clean release in three weeks.",
   },
   {
     role: "Senior Frontend Developer",
     company: "Cookytech Technology",
     period: "Aug 2021 — Dec 2021",
-    summary: "Set frontend architecture, API integration patterns and state strategy for new client apps.",
+    summary: "Set architecture for new client products and validated them with real-time and order-management proofs of concept.",
   },
   {
     role: "Frontend Developer",
     company: "Cookytech Technology",
     period: "Jan 2019 — Jul 2021",
-    summary: "Built client web apps with SSR, SSG and ISR rendering strategies.",
+    summary: "Led development of an e-learning platform that supported a startup fundraising event; shipped SSR/SSG/ISR client sites.",
   },
 ];
 
 export const interests = {
   professional: [
-    "Frontend architecture",
     "Product engineering",
+    "Frontend architecture",
     "Performance",
     "Developer experience",
     "AI-powered productivity tools",

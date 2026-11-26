@@ -37,6 +37,8 @@ src/data/
 
 Case-study sections are made of typed blocks (`p`, `list`, `callout`, `code`, `diagram`, `cards`, `decisions`). A `callout` with `tone: "placeholder"` renders a dashed "Content needed" slot, so missing details are visible rather than invented.
 
+Placeholders show in `npm run dev` only. Production builds strip them (`src/lib/placeholders.ts`), along with any section or sub-section left empty, and renumber the rest. Timeline entries marked `placeholder: true` are dropped the same way. To keep them in a production build, for example on a review deploy, build with `SHOW_CONTENT_PLACEHOLDERS=true`.
+
 Diagrams are HTML (not images) in `src/components/projects/Diagrams.tsx`, registered by id.
 
 ## Confidentiality

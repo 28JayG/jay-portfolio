@@ -33,7 +33,7 @@ const jetbrainsMono = localFont({
   preload: false,
 });
 
-const description = `${site.name} is a ${site.title.toLowerCase()} specialising in React, Next.js, TypeScript and frontend architecture. ${site.positioning}`;
+const description = `${site.name} is a ${site.title.toLowerCase()} who leans frontend — React, Next.js and TypeScript — and owns features from the problem to production. ${site.positioning}`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
